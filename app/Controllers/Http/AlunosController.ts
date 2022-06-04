@@ -22,64 +22,119 @@ export default class AlunosController {
 
     //consulta todos os alunos
 
-    public async index({}: HttpContextContract) {
+    public async index({ response }: HttpContextContract) {
         
         const aluno = await Aluno.query()
+        if (aluno != undefined) {
+            
+            return {
+                data: aluno,
+            }
 
-        return {
-            data: aluno,
+        } else {
+            response.status(404)
         }
 
     }
 
     //consulta um aluno
 
-    public async show({ params }: HttpContextContract) {
+    public async show({ params,response }: HttpContextContract) {
         
-        const id = params.id
+        if (isNaN(params.id)) {
+            response.status(400)
+        } else {
+            const id = params.id
 
-        const aluno = await Aluno.findOrFail(id)
+            const aluno = await Aluno.findOrFail(id)
+            
+            if (aluno != undefined) {
+                return {
+                    data: aluno,
+                }
+            } else {
+                response.status(404)
+            }
 
-        return {
-            data: aluno,
+            
         }
+
+        
 
     }
 
     //edita um aluno
 
-    public async update({ request, params }: HttpContextContract) {
-        const id = params.id
-        const body = request.body()
+    public async update({ request, params, response }: HttpContextContract) {
+        
+        if (isNaN(params.id)) {
 
-        const aluno = await Aluno.findOrFail(id)
+            response.status(400)
 
-        aluno.nome = body.nome
-        aluno.email = body.email
-        aluno.matricula = body.matricula
-        aluno.datanascimento = body.datanascimento
+        } else {
 
-        await aluno.save()
+            const id = params.id
+            const body = request.body()
+
+            const aluno = await Aluno.findOrFail(id)
+
+            if (aluno != undefined) {
+
+                aluno.nome = body.nome
+                aluno.email = body.email
+                aluno.matricula = body.matricula
+                aluno.datanascimento = body.datanascimento
+
+                await aluno.save()
 
 
-        return {
-            message: "aluno atualizado",
-            data: aluno
+                return {
+                    message: "aluno atualizado",
+                    data: aluno
+                }
+
+            } else {
+                response.status(400)
+            }
+
+            
+
         }
+
+        
     }
 
     //Deleta um aluno 
 
-    public async destroy({ params }: HttpContextContract){
+    public async destroy({ params, response }: HttpContextContract){
         
-        const aluno = await Aluno.findOrFail(params.id)
+        if (isNaN(params.id)) {
 
-        aluno.delete()
+            response.status(400)
 
-        return {
-            message: "Aluno Deletado com sucesso",
-            data : aluno
+        } else {
+
+            const aluno = await Aluno.findOrFail(params.id)
+
+            if (aluno != undefined) {
+                aluno.delete()
+
+                return {
+                    message: "Aluno Deletado com sucesso",
+                    data : aluno
+                }
+
+            } else {
+
+                response.status(404)
+
+            }
+
+            
         }
+
+
+        
 
 
     }
